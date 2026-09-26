@@ -1,0 +1,435 @@
+<!----------------------------------------
+    PyScript 2026.7.3, in-text CSS利用
+---------------------------------------->
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>TIC TAC TOE</title>
+
+
+    <!-- PyScript 2026.7.3 -->
+    <script
+        type="module"
+        src="https://pyscript.net/releases/2026.7.3/core.js">
+    </script>
+
+    <!-- in-text CSS -->
+    <style>
+
+        #grid {
+            display: grid;
+
+            grid-template-columns: 80px 80px 80px;
+            grid-template-rows: 80px 80px 80px;
+
+            gap: 5px;
+
+            margin: 0 auto;
+            
+            width: max-content;
+
+            background-color: rgb(127, 117, 104);
+        }
+
+
+        .cell {
+            width: 80px;
+            height: 80px;
+
+            font-size: 72px;
+
+            -webkit-text-fill-color: darkred;
+
+            background-color: white;
+
+            border: 0px;
+        }
+        
+
+        .winner {
+            background-color: darkred;
+
+            -webkit-text-fill-color: white;
+        }
+
+        /* --------TITLE--------- */
+        h2 {
+            text-align: center;
+
+            color: darkred;
+        }
+
+        /* --------MESSAGE--------- */
+
+        h3 {
+            text-align: center;
+
+            font-weight: normal;
+
+            color: rgb(107, 49, 49);
+
+            background-color: rgb(223, 219, 211);
+        }
+
+
+        /* -------------------------
+           WINNER MESSAGE
+           ------------------------- */
+
+        h3.winner-message {
+            color: white;
+
+            background-color: darkred;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div id="tic-tac-toe">
+
+        <h2>TIC TAC TOE</h2>
+
+
+        <h3 id="message">
+            Loading...
+        </h3>
+
+
+        <div id="grid">
+
+            <button id="pos-1" class="cell"></button>
+
+            <button id="pos-2" class="cell"></button>
+
+            <button id="pos-3" class="cell"></button>
+
+            <button id="pos-4" class="cell"></button>
+
+            <button id="pos-5" class="cell"></button>
+
+            <button id="pos-6" class="cell"></button>
+
+            <button id="pos-7" class="cell"></button>
+
+            <button id="pos-8" class="cell"></button>
+
+            <button id="pos-9" class="cell"></button>
+
+        </div>
+
+    </div>
+
+
+    <!-- Python -->
+
+    <script type="py">
+
+from pyscript import web
+from pyscript import when
+
+
+def cell_click(position):
+
+    game.play_turn(position)
+
+
+def update_cells(values):
+
+    for i, value in enumerate(values):
+
+        cell = web.page[f"pos-{i + 1}"]
+
+
+        if value == 0:
+
+            cell.textContent = "X"
+
+        elif value == 1:
+
+            cell.textContent = "O"
+
+        else:
+
+            cell.textContent = ""
+
+
+def display_message(value):
+
+    message = web.page["message"]
+
+    message.textContent = value
+
+
+def display_finished_message(value):
+
+    message = web.page["message"]
+
+    message.textContent = value
+
+    message.classes.add(
+        "winner-message"
+        )
+
+
+def display_winner_cells(pattern):
+
+    for position in pattern:
+
+        cell = web.page[f"pos-{position + 1}"]
+
+        cell.classes.add(
+            "winner"
+            )
+
+
+class TicTacToe:
+
+
+    def start(self):
+
+        # 0 = X
+        # 1 = O
+
+        self.player = 0
+
+        self.cells = [None] * 9
+
+        self.game_running = True
+
+        display_message("X Turn")
+
+        update_cells(self.cells)
+
+
+
+    def play_turn(self, position):
+
+
+        if not self.game_running:
+
+            return
+
+
+        # Cell already occupied
+        if self.cells[position] is not None:
+
+            return
+
+
+        # Put player into cell
+        self.cells[position] = self.player
+
+
+        # Update board
+        update_cells(self.cells)
+
+
+        # Check game over
+        if not self.is_game_over():
+
+            self.next_player()
+
+
+    def next_player(self):
+
+
+        player_messages = [
+
+            "X Turn",
+
+            "O Turn"
+
+        ]
+
+        # 0 -> 1
+        # 1 -> 0
+
+        self.player = (self.player + 1) % 2
+
+
+        display_message(
+            player_messages[self.player]
+        )
+
+
+
+    def is_game_over(self):
+
+
+        # -------------------------
+        # WINNER
+        # -------------------------
+
+        winning_pattern = (
+            self.is_winner()
+        )
+
+
+        if winning_pattern is not None:
+
+
+            win_messages = [
+
+                "X Wins!",
+
+                "O Wins!"
+
+            ]
+
+
+            display_finished_message(
+                win_messages[self.player]
+            )
+
+
+            display_winner_cells(
+                winning_pattern
+            )
+
+
+            self.game_running = False
+
+
+            return True
+
+
+        # -------------------------
+        # DRAW
+        # -------------------------
+
+        if self.is_draw():
+
+            display_finished_message("Draw!")
+
+            self.game_running = False
+
+            return True
+
+        # -------------------------
+        # CONTINUE
+        # -------------------------
+
+        return False
+
+
+    # ------------------------------------------------
+    # WINNER CHECKER
+    # ------------------------------------------------
+
+    def is_winner(self):
+
+
+        win_patterns = [
+            (0, 1, 2), (3, 4, 5), (6, 7, 8),
+            (0, 3, 6), (1, 4, 7), (2, 5, 8),
+            (0, 4, 8), (2, 4, 6)
+        ]
+
+
+        for a, b, c in win_patterns:
+
+
+            if (
+                self.cells[a]
+                == self.cells[b]
+                == self.cells[c]
+                == self.player
+            ):
+
+                return (a, b, c)
+
+
+        return None
+
+
+    # ------------------------------------------------
+    # DRAW
+    # ------------------------------------------------
+    def is_draw(self):
+
+
+        return all(
+
+            value is not None
+
+            for value in self.cells
+
+        )
+
+
+game = TicTacToe()
+
+game.start()
+
+
+@when("click", "#pos-1")
+def click_1(event):
+
+    cell_click(0)
+
+
+@when("click", "#pos-2")
+def click_2(event):
+
+    cell_click(1)
+
+
+@when("click", "#pos-3")
+def click_3(event):
+
+    cell_click(2)
+
+
+@when("click", "#pos-4")
+def click_4(event):
+
+    cell_click(3)
+
+
+@when("click", "#pos-5")
+def click_5(event):
+
+    cell_click(4)
+
+
+@when("click", "#pos-6")
+def click_6(event):
+
+    cell_click(5)
+
+
+@when("click", "#pos-7")
+def click_7(event):
+
+    cell_click(6)
+
+
+@when("click", "#pos-8")
+def click_8(event):
+
+    cell_click(7)
+
+
+@when("click", "#pos-9")
+def click_9(event):
+
+    cell_click(8)
+
+    </script>
+
+
+</body>
+
+</html>
