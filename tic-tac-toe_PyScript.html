@@ -23,7 +23,7 @@
     <!-- in-text CSS -->
     <style>
 
-        #grid {
+        #board {
             display: grid;
 
             grid-template-columns: 80px 80px 80px;
@@ -107,7 +107,9 @@
         </h3>
 
 
-        <div id="grid">
+        <div id="board">
+
+            <button id="pos-0" class="cell"></button>
 
             <button id="pos-1" class="cell"></button>
 
@@ -124,8 +126,6 @@
             <button id="pos-7" class="cell"></button>
 
             <button id="pos-8" class="cell"></button>
-
-            <button id="pos-9" class="cell"></button>
 
         </div>
 
@@ -149,7 +149,7 @@ def update_cells(values):
 
     for i, value in enumerate(values):
 
-        cell = web.page[f"pos-{i + 1}"]
+        cell = web.page[f"pos-{i}"]
 
 
         if value == 0:
@@ -187,7 +187,7 @@ def display_winner_cells(pattern):
 
     for position in pattern:
 
-        cell = web.page[f"pos-{position + 1}"]
+        cell = web.page[f"pos-{position}"]
 
         cell.classes.add(
             "winner"
@@ -374,58 +374,14 @@ game = TicTacToe()
 game.start()
 
 
-@when("click", "#pos-1")
-def click_1(event):
+@when("click", ".cell")
+def cell_click_event(event):
 
-    cell_click(0)
-
-
-@when("click", "#pos-2")
-def click_2(event):
-
-    cell_click(1)
-
-
-@when("click", "#pos-3")
-def click_3(event):
-
-    cell_click(2)
-
-
-@when("click", "#pos-4")
-def click_4(event):
-
-    cell_click(3)
-
-
-@when("click", "#pos-5")
-def click_5(event):
-
-    cell_click(4)
-
-
-@when("click", "#pos-6")
-def click_6(event):
-
-    cell_click(5)
-
-
-@when("click", "#pos-7")
-def click_7(event):
-
-    cell_click(6)
-
-
-@when("click", "#pos-8")
-def click_8(event):
-
-    cell_click(7)
-
-
-@when("click", "#pos-9")
-def click_9(event):
-
-    cell_click(8)
+    position = int(
+        event.target.id.split("-")[1]
+    )
+    
+    cell_click(position)
 
     </script>
 
